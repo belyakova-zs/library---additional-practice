@@ -1,86 +1,115 @@
-import { books } from './books.js';
-console.log(books);
+import { books } from "./books.js";
+const divEl = document.querySelector("#root");
+const divLeft = document.createElement("div");
+const divRight = document.createElement("div");
 
-const divEl = document.getElementById('root');
-// console.log(divEl);
-const divLeftEl = document.createElement('div');
-const divRightEl = document.createElement('div');
-divEl.append(divLeftEl, divRightEl);
-divLeftEl.classList.add('divLeft');
-divRightEl.className = 'divRight';
+divEl.append(divLeft, divRight);
 
-const titleEl = document.createElement('h1');
-titleEl.textContent = 'Библиотекарск';
-divLeftEl.appendChild(titleEl);
+divLeft.className = "divLeft";
+divRight.className = "divRight";
 
-const listLeftEl = document.createElement('ul');
-const btnAddLeftEl = document.createElement('button');
-btnAddLeftEl.textContent = 'Добавить';
-divLeftEl.append(listLeftEl, btnAddLeftEl);
-// наполнить список книг
+const titleEl = document.createElement("h1");
+titleEl.textContent = "Библиотека";
+divLeft.appendChild(titleEl);
+
+const listLeftEl = document.createElement("ul");
+const btnAddLeft = document.createElement("button");
+
+btnAddLeft.textContent = "Add";
+
+divLeft.append(listLeftEl, btnAddLeft);
+
+btnAddLeft.addEventListener("click", addBook);
+
 function renderList() {
   const booksListMarkup = books
     .map(
-      ({ title }) =>
-        `<li><p class="bookName">${title}</p><button>Редактировать</button><button>Удалить</button></li>`,
+      ({ title, id }) =>
+        `<li id="${id}"><p class="bookName">${title}</p><button type="button" data-action="edit">Редактировать</button><button type="button" data-action="delete">Удалить</button></li>`
     )
-    .join('');
-  listLeftEl.insertAdjacentHTML('afterbegin', booksListMarkup);
-  // псевдомассив сделали все элементы с классом bookName
-  const bookName = document.querySelectorAll('.bookName');
-  // console.log(bookName);
-  // у псевдомассива есть forEach
-  bookName.forEach(el => el.addEventListener('click', onRenderPreview));
+    .join("");
+  listLeftEl.insertAdjacentHTML("afterbegin", booksListMarkup);
+
+  const bookNameEl = document.querySelectorAll(".bookName");
+  bookNameEl.forEach((el) => el.addEventListener("click", onRenderPreview));
+
+  const btnEdit = document.querySelectorAll("button[data-action='edit']");
+  const btnDelete = document.querySelectorAll("button[data-action='delete']");
+
+  btnEdit.forEach((el) => el.addEventListener("click", onEditBook));
+  btnDelete.forEach((el) => el.addEventListener("click", onDeleteBook));
 }
+
 renderList();
-function onRenderPreview(event) {
-  // console.log(event.target);
-  // нашли объект книги, по клику на название слева
-  const findBook = books.find(
-    ({ title }) => event.target.textContent === title,
+
+function onRenderPreview(even) {
+  const findeBook = books.find(
+    ({ title }) => even.target.textContent === title
   );
-  // console.log(findBook);
-  const markup = bookMarkup(findBook);
-  console.log(markup);
-  divRightEl.innerHTML = '';
-  divRightEl.insertAdjacentHTML('afterbegin', markup);
+
+  const markUp = bookMarkup(findeBook);
+  divRight.innerHTML = "";
+  divRight.insertAdjacentHTML("afterbegin", markUp);
 }
+
 function bookMarkup({ title, author, img, plot }) {
-  return `<div>
-     <h2>${title}</h2>
-     <p>${author}</p>
-     <img src="${img}" alt="Обложка книги ${title}">
-     <p>${plot}</p>
-   </div>`;
+  return `
+    <div>
+    <h2>${title}</h2>
+    <p>${author}</p>
+    <img src="${img}" alt="Обложка книги ${title}"/>
+    <p>${plot}</p>
+</div>`;
 }
-// ----------------------
 
-// function onEditBook(event) {
-//     const editBtn = event.target;
-//     const titleEdit = editBtn.previousElementSibling;
-    
-//     const findBook = books.find(({ title }) =>
-//         titleEdit.textContent === title);
-// };
+function onEditBook(event) {
+  const editBtn = event.target;
+  const titleEdit = editBtn.previousElementSibling;
 
-// function onDeleteBook() {
-// };
+  const findeBook = books.find(({ title }) => titleEdit.textContent === title);
+}
 
-// function addBook() {
-//     const newBook = { id: `${Date.now()}`, title: '', author: '', img: '', plot: '' };
+function onDeleteBook(event) {}
 
-//     const markup = createForm();
-//     divRightEl.innerHTML = '';
-//     divRightEl.insertAdjacentHTML('afterbegin', markup);
-// }
+function addBook() {
+  const newBook = {
+    id: String(Date.now()),
+    title: "",
+    author: "",
+    img: "",
+    plot: "",
+  };
 
-// function createForm() {
-//     return `
-//     <form>
-//         <label>Название книги<input name="title"></label>
-//         <label>Автор<input name="author"></label>
-//         <label>Изображение<input name="img"></label>
-//         <label>Описание<input name="plot"></label>
-//         <button type="button">Сохранить</button>
-//     </form>`;
-// }
+  const markUp = createForm();
+  divRight.innerHTML = "";
+  divRight.insertAdjacentHTML("afterbegin", markUp);
+
+  const btnSave = document.querySelector("button[data-action='save']");
+  // btnSave.addEventListener('click', addNewBookInArray)
+
+  const formEl = document.querySelector("form");
+  formEl.addEventListener("change", addNewBookInArray);
+
+  function addNewBookInArray(event) {
+    newBook.title = event.currentTarget.elements.title.value;
+    newBook.author = event.currentTarget.elements.author.value;
+    newBook.img = event.currentTarget.elements.img.value;
+    newBook.plot = event.currentTarget.elements.plot.value;
+  }
+
+  btnSave.addEventListener("click", pushBook);
+
+  function pushBook() {
+    books.push(newBook);
+  }
+}
+
+function createForm() {
+  return `<form>
+        <label>Название книги<input name="title"></label>
+        <label>Автор<input name="author"></label>
+        <label>Изображение<input name="img"></label>
+        <label>Описание<input name="plot"></label>
+        <button type="button">Сохранить</button>
+    </form>`;
+}
